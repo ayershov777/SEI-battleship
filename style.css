@@ -1,0 +1,47 @@
+* {
+    box-sizing: border-box;
+}
+
+.flexbox {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 16px;
+}
+
+.grid {
+    display: inline-grid;
+    width: 480px;
+    height: 480px;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+}
+
+.cell {
+    display: inline-block;
+    background-color: white;
+    border: 1px solid black;
+    width: 48px;
+    height: 48px;
+}
+
+.healthy-hull {
+    background-color: blue;
+}
+
+.shipyard {
+    display: inline-flex;
+    flex-direction: column;
+    width: 240px;
+}
+
+.shipyard::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+
+.ship {
+    float: left;
+    background-color: blue;
+    margin: 1px;
+}
