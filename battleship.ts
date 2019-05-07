@@ -19,8 +19,8 @@ enum ShipName {
 }
 
 enum PlayerName {
-    Player = 0,
-    Opponent = 1
+    Player = 'player',
+    Opponent = 'opponent'
 }
 
 class Hull {
@@ -71,17 +71,14 @@ class Ship {
     // generate hull based on class properties
     // assumes size and orientation are defined
     private initHull() {
-        var model: Hull[] = [];
+        this.hull = [];
+        var displacement = this.orientation ? 10 : 1;
         for(let i=0; i<this.size; i++) {
-            model.push(new Hull);
-        }
-        model.forEach((hull, i) => {
-            var displacement = this.orientation ? 10 : 1;
-            this.hull[i] = {
-                model: hull,
+            this.hull.push({
+                model: new Hull(),
                 index: i*displacement
-            };
-        });
+            });
+        }
     }
 
     // toggle orientation and reshape the model
@@ -93,55 +90,109 @@ class Ship {
 
 class Grid {
     readonly player: Player;
-    readonly ships: Ship[];
-    model: HTMLElement;
+    private readonly ships : {};
+    readonly model: HTMLElement;
     data: {
         ship: Ship,
         hit: boolean
     }[];
 
     constructor(model: HTMLElement, player: Player) {
-        this.model = model;
         this.player = player;
-        this.ships = [
-            new Ship(ShipName.Carrier, 5),
-            new Ship(ShipName.Battleship, 4),
-            new Ship(ShipName.Cruiser, 3),
-            new Ship(ShipName.Submarine, 3),
-            new Ship(ShipName.Destroyer, 2)
-        ];
+        this.ships = {
+            'carrier' : new Ship(ShipName.Carrier, 5),
+            'battleship' : new Ship(ShipName.Battleship, 4),
+            'cruiser' : new Ship(ShipName.Cruiser, 3),
+            'submarine' : new Ship(ShipName.Submarine, 3),
+            'destroyer' : new Ship(ShipName.Destroyer, 2)
+        }
+        this.model = model;
+        this.initData();
     }
 
     private initData() {
+        this.data = [];
         for(let i=0; i<100; i++) {
             this.data.push({ship: null, hit: false});
         }
+        this.insertAllShips();
     }
 
-    // inserts all ships randomly into the array
+    // inserts all ships randomly into the array,
+    // does collision checking before inserting,
+    // will remember failed indeces
     private insertAllShips() {
-
+        for(let key in this.ships) {
+            var indeces = [];
+            for(let i=0; i<100; i++) {
+                indeces.push(i);
+            }
+            while(true) {
+                var randInt = Math.floor(Math.random()*indeces.length);
+                var randIndex = indeces[randInt];
+                if(this.checkValidIndex(key, randIndex)) {
+                    this.insertShip(key, randIndex);
+                    break;
+                } else {
+                    indeces.splice(randInt, 1);
+                }
+            }
+        }
     }
 
     // Assumes that position is valid,
     // and that there will be no collision
-    private insertShip(ship: Ship, position: Pos) {
-
+    private insertShip(name: string, offset: number) {
+        var ship = this.ships[name];
+        for(let i=0; i<ship.size; i++) {
+            let absolute = offset + ship.hull[i].index;
+            this.data[absolute].ship = ship;
+            console.log(`#${this.player.name}-cell-${absolute}`);
+            let $cell = $(`#${this.player.name}-cell-${absolute}`);
+            $cell.css('background-color', 'black');
+        }
     }
 
-    moveShip(name: ShipName, position: Pos) {
+    moveShip(ship: Ship, position: Pos) {
         
     }
 
-    shipAt(position: Pos): Ship {
-
+    shipAt(index: number): Ship {
+        return this.data[index].ship;
     }
 
-    checkCollision(ship: Ship, position: Pos): boolean {
 
+    //double check that this method works
+    private checkInbounds(name: string, offset: number): boolean {
+        var ship = this.ships[name];
+        var lastIndex = offset+ship.hull[ship.size-1].index;
+        if(ship.orientation === Orientation.Horizontal) {
+            return Math.floor(offset/10) === Math.floor(lastIndex/10);
+        } else {
+            return (lastIndex <= 100 && lastIndex >= 0);
+        }
     }
 
-    private getIndexFromCoords(position: {x: number, y: number}) {
+    private checkCollision(name: string, offset: number): boolean {
+        var ship = this.ships[name];
+        for(let i=0; i<ship.size; i++) {
+            let absolute = offset + ship.hull[i].index;
+            //console.log(absolute);
+            if(this.shipAt(absolute))
+                return true;
+        }
+        return false;
+    }
+
+    private checkValidIndex(name: string, offset: number) {
+        if(!this.checkInbounds(name, offset))
+            return false;
+        if(this.checkCollision(name, offset))
+            return false;
+        return true;
+    }
+
+    private static getIndexFromCoords(position: {x: number, y: number}) {
         return position.y*10 + position.x;
     }
 
@@ -165,28 +216,6 @@ const opponent = new Player(PlayerName.Opponent);
 const oGridHTML = $('#opponent-grid')[0];
 const opponentGrid = new Grid(oGridHTML, opponent);
 
-var mouseShip: Ship;
-
-// I think these ships should be defined in the Grid class,
-// and Ship() should accept a random position argument.
-// All ships will always exist, and only within a Grid object.
-
-/*
-const pShips = [
-    new Ship(ShipName.Carrier, 5),
-    new Ship(ShipName.Battleship, 4),
-    new Ship(ShipName.Cruiser, 3),
-    new Ship(ShipName.Submarine, 3),
-    new Ship(ShipName.Destroyer, 2)
-];
-
-const oShips = [
-    new Ship(ShipName.Carrier, 5),
-    new Ship(ShipName.Battleship, 4),
-    new Ship(ShipName.Cruiser, 3),
-    new Ship(ShipName.Submarine, 3),
-    new Ship(ShipName.Destroyer, 2)
-];*/
-
+//var mouseShip: Ship;
 
 // execution
