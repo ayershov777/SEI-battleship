@@ -1,10 +1,19 @@
 body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background: blue;
+    padding-top: 48px;
 }
 
 .grids {
-    display: flex;
-    justify-content: space-around;
+    display: inline-flex;
+    justify-content: center;
+    background-color: maroon;
+    padding: 32px 48px 51px 0;
+    border: 8px solid maroon;
+    border-radius: 16px;
 }
 
 .ruler-grid {
@@ -13,18 +22,60 @@ body {
     grid-template-rows: 1fr 10fr;
     width: 528px;
     height: 528px;
+    margin: 0 32px;
 }
 
 .ruler{
-    display: grid;
+    display: flex;
 }
 
-.ruler-horizontal {
-    grid-template-rows: repeat(10, 1fr);
+.horizontal-ruler {
+    flex-direction: row;
+    width: 488px;
 }
 
-.ruler-vertical {
-    grid-template-columns: repeat(10, 1fr);
+.vertical-ruler {
+    flex-direction: column;
+    height: 488px;
+}
+
+.ruler-div {
+    display: inline-flex;
+    width: 46px;
+    height: 46px;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 700;
+}
+
+.horizontal-ruler-div {
+    border-left: 1px solid brown;
+    border-right: 1px solid brown;
+}
+
+.vertical-ruler-div {
+    border-top: 1px solid brown;
+    border-bottom: 1px solid brown;
+}
+
+.horizontal-ruler > .ruler-div:first-child {
+    margin-left: 3px;
+    border-left: 2px solid brown;
+}
+
+.vertical-ruler > .ruler-div:first-child {
+    margin-top: 3px;
+    border-top: 2px solid brown;
+}
+
+.horizontal-ruler > .ruler-div:last-child {
+    border-right: 2px solid brown;
+}
+
+.vertical-ruler > .ruler-div:last-child {
+    border-bottom: 2px solid brown;
 }
 
 .grid {
@@ -39,7 +90,7 @@ body {
 
 .cell {
     display: inline-block;
-    border: 1px solid brown;
+    border: 1px dotted brown;
     background-color: white;
 }
 
@@ -72,4 +123,22 @@ body {
 .button:active {
     width: 68px;
     height: 36px;
+}
+
+.ship {
+    background-color: white;
+}
+
+.hull {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+}
+
+.hull-healthy {
+    background-color: black;
+}
+
+.hull-damaged {
+    background-color: red;
 }
