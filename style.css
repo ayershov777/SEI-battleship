@@ -78,7 +78,7 @@ body {
     border-bottom: 2px solid brown;
 }
 
-.grid {
+.battle-grid {
     border: 4px solid brown;
     border-radius: 4px;
     display: grid;
@@ -125,15 +125,11 @@ body {
     height: 36px;
 }
 
-.ship {
-    background-color: white;
-}
-
-.hull {
+/* .hull {
     display: inline-block;
     width: 48px;
     height: 48px;
-}
+} */
 
 .hull-healthy {
     background-color: black;
