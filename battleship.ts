@@ -1,12 +1,13 @@
 // class and enum declarations
-type Pos = {
-    x: number,
-    y: number
+type Hull = {
+    hit: boolean,
+    index: number, // relative index
+    element: HTMLElement
 };
 
 enum Orientation {
-    Horizontal = 0,
-    Vertical = 1
+    Horizontal = 'horizontal',
+    Vertical = 'vertical'
 }
 
 enum ShipName {
@@ -26,10 +27,7 @@ class Ship {
     readonly name: string;
     readonly size: number;
     orientation: Orientation;
-    hull: {
-        hit: boolean,
-        index: number // relative index
-    }[];
+    hull: Hull[];
 
     constructor(name: ShipName, size: number) {
         this.name = name;
@@ -41,21 +39,37 @@ class Ship {
     // randomly assign orientation
     private initOrientation() {
         let n = Math.round(Math.random());
-        this.orientation = n;
+        this.orientation = n ? Orientation.Vertical : Orientation.Horizontal;
     }
 
     // generate hull based on class properties
     // assumes size and orientation are defined
     private initHull() {
         this.hull = [];
-        var displacement = this.orientation ? 10 : 1;
+        var displacement = this.orientation === 'horizontal' ? 1 : 10;
         for(let i=0; i<this.size; i++) {
             this.hull.push({
                 hit: false,
-                index: i*displacement
+                index: i*displacement,
+                element: (()=>{
+                    var $div = $(`<div></div>`);
+                    $div.addClass('cell');
+                    $div.addClass('ship');
+                    if(i === 0)
+                        $div.addClass('ship-front');
+                    else if(i === this.size-1) 
+                        $div.addClass('ship-back');
+                    $div.addClass(this.name);
+                    $div.addClass(this.orientation);
+                    return $div[0];
+                })()
             });
         }
     }
+
+    // private get$() : JQuery<HTMLElement> {
+
+    // }
 
     // toggle orientation and modify indices
     flip() {
@@ -64,6 +78,10 @@ class Ship {
         else
             this.orientation = Orientation.Horizontal;
         this.initHull();
+    }
+
+    select() {
+
     }
 }
 
@@ -123,13 +141,13 @@ class Grid {
     // and that there will be no collision
     insertShip(name: string, offset: number) {
         var ship = this.ships[name];
-        for(let i=0; i<ship.size; i++) {
-            let absolute = offset + ship.hull[i].index;
+        ship.hull.forEach((hull: Hull) => {
+            var absolute = offset + hull.index;
             this.data[absolute].ship = ship;
-            let $cell = $(`#${this.player.name}-cell-${absolute}`);
-            $cell.addClass('ship');
-            $cell.css('background-color', 'black');
-        }
+            var id = `${this.player.name}-cell-${absolute}`;
+            hull.element.id = id;
+            $('#'+id).replaceWith(hull.element);
+        });
     }
 
     // only works ask expected for state 1
@@ -139,69 +157,87 @@ class Grid {
         for(let i=0; i<ship.size; i++) {
             let absolute = offset + ship.hull[i].index;
             this.data[absolute].ship = null;
-            let $cell = $(`#${this.player.name}-cell-${absolute}`);
-            $cell.removeClass('ship');
-            $cell.css('background-color', '');
+            var id = `${this.player.name}-cell-${absolute}`
+            var $cell = $('#'+id);
+            var element = $(`<div class='cell' id=${id}></div>`)[0];
+            $cell.replaceWith(element);
         }
+    }
+
+    flipShip(name: string) {
+        var ship = this.ships[name];
+        var offset = this.indexOf(name);
+        this.removeShip(name);
+        ship.flip();
+        if(this.checkValidIndex(name, offset)) {
+            this.insertShip(name, offset);
+        } else {
+            ship.flip();
+            this.insertShip(name, offset);
+        }
+    }
+
+    toggleShipSelection(name: string) {
+        
     }
 
     //highlights the model of the ship
     //assumes that a ship exists at the index
-    selectShip(index: number) {
-        var ship = this.shipAt(index);
-        var offset = this.indexOf(ship.name);
+    // selectShip(index: number) {
+    //     var ship = this.shipAt(index);
+    //     var offset = this.indexOf(ship.name);
         
-        var $firstCell = $(`#${this.player.name}-cell-${offset}`);
-        var $lastCell = $(`#${this.player.name}-cell-${offset + ship.hull[ship.size-1].index}`);
-        if(ship.orientation === Orientation.Horizontal) {
-            $firstCell.css('border-left', '2px solid blue');
-            $lastCell.css('border-right', '2px solid blue');
-            ship.hull.forEach(hull => {
-                var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
-                $cell.css('border-top', '2px solid blue');
-                $cell.css('border-bottom', '2px solid blue');
-                $cell.addClass('selected');
-            });
-        } else {
-            $firstCell.css('border-top', '2px solid blue');
-            $lastCell.css('border-bottom', '2px solid blue');
-            ship.hull.forEach(hull => {
-                var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
-                $cell.css('border-left', '2px solid blue');
-                $cell.css('border-right', '2px solid blue');
-                $cell.addClass('selected');
-            });
-        }
-    }
+    //     var $firstCell = $(`#${this.player.name}-cell-${offset}`);
+    //     var $lastCell = $(`#${this.player.name}-cell-${offset + ship.hull[ship.size-1].index}`);
+    //     if(ship.orientation === Orientation.Horizontal) {
+    //         $firstCell.css('border-left', '2px solid blue');
+    //         $lastCell.css('border-right', '2px solid blue');
+    //         ship.hull.forEach(hull => {
+    //             var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
+    //             $cell.css('border-top', '2px solid blue');
+    //             $cell.css('border-bottom', '2px solid blue');
+    //             $cell.addClass('selected');
+    //         });
+    //     } else {
+    //         $firstCell.css('border-top', '2px solid blue');
+    //         $lastCell.css('border-bottom', '2px solid blue');
+    //         ship.hull.forEach(hull => {
+    //             var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
+    //             $cell.css('border-left', '2px solid blue');
+    //             $cell.css('border-right', '2px solid blue');
+    //             $cell.addClass('selected');
+    //         });
+    //     }
+    // }
 
     //removes highlighting from the ship model
     //assumes that a ship exists at the index
-    deselectShip(index: number) {
-        var ship = this.shipAt(index);
-        var offset = this.indexOf(ship.name);
+    // deselectShip(index: number) {
+    //     var ship = this.shipAt(index);
+    //     var offset = this.indexOf(ship.name);
         
-        var $firstCell = $(`#${this.player.name}-cell-${offset}`);
-        var $lastCell = $(`#${this.player.name}-cell-${offset + ship.hull[ship.size-1].index}`);
-        if(ship.orientation === Orientation.Horizontal) {
-            $firstCell.css('border-left', '1px dotted brown');
-            $lastCell.css('border-right', '1px dotted brown');
-            ship.hull.forEach(hull => {
-                var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
-                $cell.css('border-top', '1px dotted brown');
-                $cell.css('border-bottom', '1px dotted brown');
-                $cell.removeClass('selected');
-            });
-        } else {
-            $firstCell.css('border-top', '1px dotted brown');
-            $lastCell.css('border-bottom', '1px dotted brown');
-            ship.hull.forEach(hull => {
-                var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
-                $cell.css('border-left', '1px dotted brown');
-                $cell.css('border-right', '1px dotted brown');
-                $cell.removeClass('selected');
-            });
-        }
-    }
+    //     var $firstCell = $(`#${this.player.name}-cell-${offset}`);
+    //     var $lastCell = $(`#${this.player.name}-cell-${offset + ship.hull[ship.size-1].index}`);
+    //     if(ship.orientation === Orientation.Horizontal) {
+    //         $firstCell.css('border-left', '1px dotted brown');
+    //         $lastCell.css('border-right', '1px dotted brown');
+    //         ship.hull.forEach(hull => {
+    //             var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
+    //             $cell.css('border-top', '1px dotted brown');
+    //             $cell.css('border-bottom', '1px dotted brown');
+    //             $cell.removeClass('selected');
+    //         });
+    //     } else {
+    //         $firstCell.css('border-top', '1px dotted brown');
+    //         $lastCell.css('border-bottom', '1px dotted brown');
+    //         ship.hull.forEach(hull => {
+    //             var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
+    //             $cell.css('border-left', '1px dotted brown');
+    //             $cell.css('border-right', '1px dotted brown');
+    //             $cell.removeClass('selected');
+    //         });
+    //     }
+    // }
 
     shipAt(index: number): Ship {
         return this.data[index].ship;
@@ -214,19 +250,6 @@ class Grid {
         });
     }
 
-    getShipModel(name: string): JQuery<HTMLElement> {
-        var ship = this.ships[name];
-        var offset = this.indexOf(ship.name);
-        ship.hull.forEach(hull => {
-            var $cell = $(`#${this.player.name}-cell-${offset + hull.index}`);
-            $cell.addClass('grab');
-        });
-        var $grab = $('.grab');
-        $grab.removeClass('grab');
-        return $grab;
-    }
-
-    //double check that this method works
     private checkInbounds(name: string, offset: number): boolean {
         var ship = this.ships[name];
         var lastIndex = offset+ship.hull[ship.size-1].index;
@@ -248,10 +271,12 @@ class Grid {
     }
 
     checkValidIndex(name: string, offset: number) {
-        if(!this.checkInbounds(name, offset))
+        if(!this.checkInbounds(name, offset)) {
             return false;
-        if(this.checkCollision(name, offset))
+        }
+        if(this.checkCollision(name, offset)) {
             return false;
+        }
         return true;
     }
 }
@@ -277,54 +302,69 @@ const game = {
     state1: function(){
         var selectedShip: Ship = null;
         var $pBattleGrid = $(playerGrid.model);
-        $pBattleGrid.on('dblclick', '.ship', function(e){
-            var index = parseInt(e.target.id.split('-')[2]);
-            var ship = playerGrid.data[index].ship;
-            var offset = playerGrid.indexOf(ship.name);
-            playerGrid.deselectShip(index);
-            selectedShip = null;
-            playerGrid.removeShip(ship.name);
-            ship.flip();
-            if(playerGrid.checkValidIndex(ship.name, offset)) {
-                playerGrid.insertShip(ship.name, offset);
-            } else {
-                ship.flip();
-                playerGrid.insertShip(ship.name, offset);
-            }
-        });
-        $pBattleGrid.on('click', '.cell', async function(e) {
-            var offset = parseInt(e.target.id.split('-')[2]);
-            var ship = playerGrid.shipAt(offset);
-            if(selectedShip && selectedShip != ship) {
-                var index = playerGrid.indexOf(selectedShip.name);
-                playerGrid.deselectShip(index);
 
-                playerGrid.removeShip(selectedShip.name);
-                if(playerGrid.checkValidIndex(selectedShip.name, offset))
-                    playerGrid.insertShip(selectedShip.name, offset);
-                else {
-                    playerGrid.insertShip(selectedShip.name, index);
-                    (<any>playerGrid.getShipModel(selectedShip.name)).effect('shake', {distance: 15}, 250);
-                }
-                selectedShip = null;
-            }
-        });
-        $pBattleGrid.on('click', '.ship', function(e) {
+        $pBattleGrid.on('click', '.cell', function(e) {
+            var $cell = $(e.target);
             var index = parseInt(e.target.id.split('-')[2]);
-            var ship = playerGrid.data[index].ship;
-            if(!selectedShip) {
-                selectedShip = ship;
-                playerGrid.selectShip(index);
+            if($cell.hasClass('ship')) {
+                var ship = playerGrid.data[index].ship;
+                if($cell.hasClass('selected')){
+                    $('.selected').removeClass('selected');
+                } else {
+                    $('.selected').removeClass('selected');
+                    $('#player-grid > .'+ship.name).addClass('selected');
+                }
             } else {
-                selectedShip = null;
-                playerGrid.deselectShip(index);
+                console.log('clicked water');
             }
         });
+
+
+        // $pBattleGrid.on('dblclick', '.ship', function(e){
+        //     var index = parseInt(e.target.id.split('-')[2]);
+        //     var ship = playerGrid.data[index].ship;
+        //     var offset = playerGrid.indexOf(ship.name);
+        //     playerGrid.deselectShip(index);
+        //     selectedShip = null;
+        //     playerGrid.removeShip(ship.name);
+        //     ship.flip();
+        //     if(playerGrid.checkValidIndex(ship.name, offset)) {
+        //         playerGrid.insertShip(ship.name, offset);
+        //     } else {
+        //         ship.flip();
+        //         playerGrid.insertShip(ship.name, offset);
+        //     }
+        // });
+        // $pBattleGrid.on('click', '.cell', async function(e) {
+        //     var offset = parseInt(e.target.id.split('-')[2]);
+        //     var ship = playerGrid.shipAt(offset);
+        //     if(selectedShip && selectedShip != ship) {
+        //         var index = playerGrid.indexOf(selectedShip.name);
+        //         playerGrid.deselectShip(index);
+
+        //         playerGrid.removeShip(selectedShip.name);
+        //         if(playerGrid.checkValidIndex(selectedShip.name, offset))
+        //             playerGrid.insertShip(selectedShip.name, offset);
+        //         else {
+        //             playerGrid.insertShip(selectedShip.name, index);
+        //             (<any>playerGrid.getShipModel(selectedShip.name)).effect('shake', {distance: 15}, 250);
+        //         }
+        //         selectedShip = null;
+        //     }
+        // });
+        // $pBattleGrid.on('click', '.ship', function(e) {
+        //     var index = parseInt(e.target.id.split('-')[2]);
+        //     var ship = playerGrid.data[index].ship;
+        //     if(!selectedShip) {
+        //         selectedShip = ship;
+        //         playerGrid.selectShip(index);
+        //     } else {
+        //         selectedShip = null;
+        //         playerGrid.deselectShip(index);
+        //     }
+        // });
     }
 }
 
 // execution
 game.state1();
-
-
-console.log(playerGrid.getShipModel('battleship'));

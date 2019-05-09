@@ -94,6 +94,36 @@ body {
     background-color: white;
 }
 
+.ship {
+    background-color: black;
+}
+
+.horizontal.selected.ship-front {
+    border-left: 2px solid blue;
+}
+
+.horizontal.selected {
+    border-top: 2px solid blue;
+    border-bottom: 2px solid blue;
+}
+
+.horizontal.selected.ship-back {
+    border-right: 2px solid blue;
+}
+
+.vertical.selected.ship-front {
+    border-top: 2px solid blue;
+}
+
+.vertical.selected {
+    border-left: 2px solid blue;
+    border-right: 2px solid blue;
+}
+
+.vertical.selected.ship-back {
+    border-bottom: 2px solid blue;
+}
+
 .game-console {
     display: flex;
     flex-direction: column;
@@ -123,18 +153,4 @@ body {
 .button:active {
     width: 68px;
     height: 36px;
-}
-
-/* .hull {
-    display: inline-block;
-    width: 48px;
-    height: 48px;
-} */
-
-.hull-healthy {
-    background-color: black;
-}
-
-.hull-damaged {
-    background-color: red;
 }
