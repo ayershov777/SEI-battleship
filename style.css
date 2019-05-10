@@ -94,8 +94,20 @@ body {
     background-color: white;
 }
 
-.ship {
+.cell.missed-cell {
+    background-color: teal;
+}
+
+#player-grid .ship {
     background-color: black;
+}
+
+#opponent-grid .ship {
+    background-color: '';
+}
+
+.damaged-ship {
+    background-color: red;
 }
 
 .horizontal.selected.ship-front {
