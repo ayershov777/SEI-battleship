@@ -363,7 +363,6 @@ const game = {
         this.$oBattleGrid.off('click');
         alert(winner + " wins the game!");
     }
-
 }
 
 // execution
