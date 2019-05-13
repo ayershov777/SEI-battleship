@@ -9,4 +9,4 @@ if you hit you get to go again
 if you miss, it's the opponent's turn.  
 The opponent will move immediately after you so it may be a little confusing
   
-(click here to play)[https://ayershov777.github.io/SEI-battleship/]
+[click here to play](https://ayershov777.github.io/SEI-battleship/)
