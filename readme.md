@@ -1,4 +1,4 @@
-#Battleship
+# Battleship
 
 double click a ship to rotate  
 click a ship to select  
