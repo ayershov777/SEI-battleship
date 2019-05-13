@@ -1,0 +1,1 @@
+$('#ready-button').click(()=> $('#opponent-ruler-grid').toggle());

@@ -4,23 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Battleship</title>
+    <title>Battleship!</title>
 
     <link rel='stylesheet' href='style.css' type='text/css'>
-    <script defer src='main.js'></script>
+
+    <script 
+        src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+
+    <script
+        src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+        integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+        crossorigin="anonymous"></script>
 
 </head>
 <body>
-    
-    <div class='game flexbox'>
-        <div class='grid'></div>
-        <div class='shipyard'></div>
+
+    <div class='grids'>
+
+        <div id='player-ruler-grid' class='ruler-grid'>
+            <div></div>
+            <div class='ruler horizontal-ruler'></div>
+            <div class='ruler vertical-ruler'></div>
+            <div id='player-grid' class='battle-grid'></div>
+        </div>
+
+        <div id='opponent-ruler-grid' class='ruler-grid'>
+            <div></div>
+            <div class='ruler horizontal-ruler'></div>
+            <div class='ruler vertical-ruler'></div>
+            <div id='opponent-grid' class='battle-grid'></div>
+        </div>
     </div>
+    <script src="fillGrids.js"></script>
 
-    <nav class='flexbox'>
-        <label id='ready'></label>
-        <button id='ready'>Ready</button>
-    </nav>
+    <div class='game-console'>
+        <button id='ready-button' class='button'>ready</button>
+    </div>
+    <script src="console.js"></script>
 
+    <script defer src='battleship.js'></script>
 </body>
 </html>
